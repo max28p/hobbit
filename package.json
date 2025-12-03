@@ -1,0 +1,20 @@
+{
+  "name": "xobbit",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node js/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "multer": "^2.0.2",
+    "mysql2": "^3.15.3",
+    "node": "^20.19.6"
+  },
+  "description": ""
+}

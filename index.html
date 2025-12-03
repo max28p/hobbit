@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>хоббит</title>
+        <link rel="stylesheet" href="./css/reset.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <link rel="stylesheet" href="./css/autor.css">
+        <link rel="stylesheet" href="./css/style.css">
+        <link rel="stylesheet" href="./css/main.css">
+    </head>
+    <body>
+        <header>
+            <p>хоббит</p>
+            <div class="dropdown">
+                <button class="btn btn-secondary profil" id="profileImgHeader" type="button" data-bs-toggle="dropdown" aria-invalid="false"><img id="profileAvatar" src="/imgProfile/default.png"></button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="profile()">Профиль</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setings()">Настройки</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a onclick="exit()" class="dropdown-item" href="#">Выход</a></li>
+                </ul>
+            </div>
+        </header>
+        <div class="conteiner">
+            <menu>
+                <button id="button-ribbon" onclick="ribbon()">Лента</button>
+                <button id="button-profile" onclick="profile()">Профиль</button>
+                <button id="button-friends" onclick="friends()">Друзья</button>
+                <button id="button-search" onclick="search()">Поиск</button>
+            </menu>
+            <main>
+                <div id="conteiner-ribbon" class="ribbon off"></div>
+                <div id="conteiner-profile" class="profile off">
+                    <div class="profile-header">
+                        <p id="profileName">name</p>
+                        <button onclick="newPostss()">новый пост</button>
+                    </div>
+                    <div class="my-posts"></div>
+                </div>
+                <div id="conteiner-friends" class="friends off"></div>
+                <div id="conteiner-search" class="search off"></div>
+                <div id="conteiner-options" class="options off">
+                    <div class="options_header"><p>Настройки</p></div>
+                    <div class="options_photo">
+                        <img id="preview" src="" alt="">
+                        <input type="file" id="fileInput" accept="image/*" style="display:none">
+                        <button id="uploadBtn">изменить фото профиля</button>
+                    </div>
+                    <div class="options_name">
+                        <p>Ваше имя: <span id="optionsName"></span></p>
+                        <button>Изменить</button>
+                    </div>
+                    <div>
+                        <p>Ваш логин: <span id="optionsLogin"></span></p>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <div id="containerPosts" class="container_posts ">
+            <div class="new-posts">
+                <H3>Новый пост</H3>
+                <input id="profileInput" type="file" accept="image/*">
+                <textarea id="profileTextarea" placeholder="Введите текст" id=""></textarea>
+                <button onclick="createPosts()">Опубликовать</button>
+                <button onclick="exitPosts()">Назад</button>
+            </div>
+        </div>
+        <div id="authorizationContainer" class="container-autorization">
+            <div id="authorization" class="authorization on">
+                <h1>Авторизация</h1>
+                <input id="login" type="text" title="login" placeholder="Логин"><br>
+                <input id="password" type="password" title="password" placeholder="Пароль"><br>
+                <button onclick="windowRegistration()" href="#">Регистрация</button><br>
+                <button onclick="enterspase()">Вход</button>
+            </div>
+            <div id="registration" class="registration off">
+                <h1>Регистрация</h1>
+                <input id="name" type="text" title="name" placeholder="Имя"><br>
+                <input id="email" type="email" title="email" placeholder="Почта"><br>
+                <input id="RgLogin" type="text" title="login" placeholder="Логин"><br>
+                <input id="RgPassword" type="password" title="password" placeholder="Пароль"><br>
+                <button onclick="registration()" href="#">Зарегистрироваться</button><br>
+                <button onclick="beck()">Назад</button>
+            </div>
+        </div>
+    </body>
+    <script src="./js/main.js" defer></script>
+    <script src="./js/menu.js"></script>
+    <script src="./js/posts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</html>
