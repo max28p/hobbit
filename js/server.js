@@ -29,11 +29,21 @@ connection.connect((err) => {
     }
 })
 
+// Убеждаемся, что папка publicate существует
+const publicateDir = path.join(__dirname, "publicate");
+if (!fs.existsSync(publicateDir)) {
+    fs.mkdirSync(publicateDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
-    destination: async function(req, file, cb) {
+    destination: function(req, file, cb) {
         const user_id = req.body.user_id;
 
-        const userFolder = path.join(__dirname, "publicate", user_id);
+        if (!user_id) {
+            return cb(new Error('user_id обязателен для загрузки файла'), null);
+        }
+
+        const userFolder = path.join(__dirname, "publicate", String(user_id));
 
         if (!fs.existsSync(userFolder)) {
             fs.mkdirSync(userFolder, { recursive: true });
@@ -43,10 +53,12 @@ const storage = multer.diskStorage({
     },
 
     filename: function (req, file, cb) {
-        const unique = Date.now() + "_" + file.originalname;
+        const unique = Date.now() + "_" + Math.random().toString(36).substring(7) + "_" + file.originalname;
         cb(null, unique);
     }
 });
+
+const upload = multer({ storage });
 
 server.post('/login', async (req, res) => {
     const { login, password } = req.body;
@@ -60,6 +72,7 @@ server.post('/login', async (req, res) => {
         const user = results[0];
         if (password === user.password) {
             return res.status(201).json({
+                user_id: user.id,
                 login: user.login,
                 name: user.full_name,
                 message: 'good'
@@ -74,7 +87,7 @@ server.post('/registration', async (req, res) => {
     const {name, email, login, password} = req.body;
 
     if (!name || !email || !login || !password) {
-        if (err) return res.json({message: 'заполните поля'})
+        return res.json({message: 'заполните поля'})
     }
 
     connection.query('SELECT * FROM users WHERE login = ?', [login], async (err, results) => {
@@ -96,34 +109,99 @@ server.post('/registration', async (req, res) => {
     )
 })
 
-server.post("/api/create_post", upload.single("media"), (req, res) => {
-    const { user_id, content } = req.body;
-    let media_url = null;
+// Обработка ошибок multer
+server.post("/api/create_post", (req, res, next) => {
+    upload.single("media")(req, res, (err) => {
+        if (err) {
+            console.error("Ошибка загрузки файла:", err);
+            return res.status(400).json({ success: false, message: "Ошибка при загрузке файла: " + err.message });
+        }
+        next();
+    });
+}, (req, res) => {
+    try {
+        const { user_id, content } = req.body;
 
-    if (req.file) {
-        media_url = `/publicate/${user_id}/${req.file.filename}`;
+        if (!user_id) {
+            return res.status(400).json({ success: false, message: "user_id обязателен" });
+        }
+
+        let media_url = null;
+
+        if (req.file) {
+            media_url = `/publicate/${user_id}/${req.file.filename}`;
+        }
+
+        connection.query(
+            "INSERT INTO posts (author_id, content, media_url) VALUES (?, ?, ?)",
+            [user_id, content, media_url],
+            (err, result) => {
+                if (err) {
+                    console.error("Ошибка при создании поста:", err);
+                    return res.status(500).json({ success: false, error: err.message });
+                }
+
+                res.json({
+                    success: true,
+                    post: {
+                        id: result.insertId,
+                        content,
+                        media_url
+                    }
+                });
+            }
+        );
+    } catch (error) {
+        console.error("Ошибка при обработке запроса:", error);
+        res.status(500).json({ success: false, message: "Ошибка сервера", error: error.message });
     }
+});
+
+// Получение постов пользователя
+server.get("/api/user_posts/:user_id", (req, res) => {
+    const user_id = req.params.user_id;
 
     connection.query(
-        "INSERT INTO posts (author_id, content, media_url) VALUES (?, ?, ?)",
-        [user_id, content, media_url],
-        (err, result) => {
-            if (err) return res.status(500).json({ success: false, error: err });
+        `SELECT p.*, u.full_name, u.login 
+         FROM posts p 
+         JOIN users u ON p.author_id = u.id 
+         WHERE p.author_id = ? 
+         ORDER BY p.id DESC`,
+        [user_id],
+        (err, results) => {
+            if (err) {
+                console.error("Ошибка при получении постов:", err);
+                return res.status(500).json({ success: false, error: err.message });
+            }
 
             res.json({
                 success: true,
-                post: {
-                    id: result.insertId,
-                    content,
-                    media_url
-                }
+                posts: results
             });
         }
     );
 });
 
+// Получение всех постов (для ленты)
+server.get("/api/all_posts", (req, res) => {
+    connection.query(
+        `SELECT p.*, u.full_name, u.login 
+         FROM posts p 
+         JOIN users u ON p.author_id = u.id 
+         ORDER BY p.id DESC`,
+        (err, results) => {
+            if (err) {
+                console.error("Ошибка при получении всех постов:", err);
+                return res.status(500).json({ success: false, error: err.message });
+            }
 
-const upload = multer({ storage });
+            res.json({
+                success: true,
+                posts: results
+            });
+        }
+    );
+});
 
 server.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на http://localhost:${PORT}`)})

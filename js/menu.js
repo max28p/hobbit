@@ -20,6 +20,11 @@ function ribbon() {
     friendsContainer.classList.add("off");
     searchContainer.classList.add("off");
     optionsContainer.classList.add("off");
+    
+    // Загружаем все посты в ленту
+    if (typeof loadAllPosts === 'function') {
+        loadAllPosts();
+    }
 }
 
 function profile() {
@@ -36,6 +41,11 @@ function profile() {
 
     const name = localStorage.getItem("namest");
     document.getElementById("profileName").textContent = `${name}`;
+    
+    // Загружаем посты пользователя
+    if (typeof loadUserPosts === 'function') {
+        loadUserPosts();
+    }
 }
 
 function friends() {

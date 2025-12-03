@@ -13,17 +13,15 @@ async function enterspase() {
 
     const data = await response.json();
 
-    localStorage.setItem("loginst", data.login);
-    localStorage.setItem("namest", data.name);
-
     if (response.status === 201) {
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("loginst", data.login);
+        localStorage.setItem("namest", data.name);
         authorizationContainer.classList.add("off")
         document.getElementById("login").value = "";
         document.getElementById("password").value = "";
-
     } else {
-        const result = await response.json();
-        alert(result.message);
+        alert(data.message);
     }
 }
 
@@ -91,3 +89,42 @@ function exit() {
     authorizationContainer.classList.remove("off");
     localStorage.clear()
 }
+
+// Проверка авторизации при загрузке страницы
+function checkAuth() {
+    const user_id = localStorage.getItem("user_id");
+    const authorizationContainer = document.getElementById("authorizationContainer");
+
+    if (user_id) {
+        // Пользователь авторизован - скрываем форму авторизации
+        if (authorizationContainer) {
+            authorizationContainer.classList.add("off");
+        }
+        
+        // Обновляем данные профиля из localStorage
+        const name = localStorage.getItem("namest");
+        const login = localStorage.getItem("loginst");
+        
+        if (name) {
+            const profileName = document.getElementById("profileName");
+            if (profileName) {
+                profileName.textContent = name;
+            }
+        }
+        
+        // Показываем ленту по умолчанию (если функция доступна)
+        setTimeout(() => {
+            if (typeof ribbon === 'function') {
+                ribbon();
+            }
+        }, 100);
+    } else {
+        // Пользователь не авторизован - показываем форму авторизации
+        if (authorizationContainer) {
+            authorizationContainer.classList.remove("off");
+        }
+    }
+}
+
+// Вызываем проверку при загрузке страницы (после загрузки всех скриптов)
+window.addEventListener('load', checkAuth);
